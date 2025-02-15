@@ -80,9 +80,9 @@ jobs:
         run: |
           cd $PROJECT_PATH
           make
-          chmod +x /bin/hev-socks5-tunnel
-          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" /bin/hev-socks5-tunnel && rm -rf /bin/hev-socks5-tunnel
-          gh release upload $TAG_NAME "/bin/hev-socks5-tunnel-$BARCH.tar.gz"
+          chmod +x bin/hev-socks5-tunnel
+          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" bin/hev-socks5-tunnel && rm -rf bin/hev-socks5-tunnel
+          gh release upload $TAG_NAME "bin/hev-socks5-tunnel-$BARCH.tar.gz"
   macos_x86:
     name: macOS
     runs-on: macos-13
@@ -104,6 +104,6 @@ jobs:
         run: |
           cd $PROJECT_PATH
           make
-          chmod +x /bin/hev-socks5-tunnel
-          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" /bin/hev-socks5-tunnel && rm -rf /bin/hev-socks5-tunnel
-          gh release upload $TAG_NAME "/bin/hev-socks5-tunnel-$BARCH.tar.gz"
+          chmod +x bin/hev-socks5-tunnel
+          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" bin/hev-socks5-tunnel && rm -rf bin/hev-socks5-tunnel
+          gh release upload $TAG_NAME "bin/hev-socks5-tunnel-$BARCH.tar.gz"
