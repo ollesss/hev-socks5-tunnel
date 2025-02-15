@@ -58,9 +58,6 @@ jobs:
         run: |
           cd $PROJECT_PATH
           ./build-apple.sh
-      - name: Move to PROJECT_PATH
-        run: |
-          mv /Users/runner/work/hev-socks5-tunnel/hev-socks5-tunnel/HevSocks5Tunnel.xcframework $PROJECT_PATH/HevSocks5Tunnel.xcframework
       - name: Upload Release
         run: |
           cd $PROJECT_PATH
