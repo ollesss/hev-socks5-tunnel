@@ -62,4 +62,5 @@ jobs:
       - name: Upload Release
         run: |
           cd $PROJECT_PATH
-          gh release upload $TAG_NAME "./HevSocks5Tunnel.xcframework"
+          tar -czvf "HevSocks5Tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework
+          gh release upload $TAG_NAME "HevSocks5Tunnel-$BOS-$BARCH.tar.gz"
