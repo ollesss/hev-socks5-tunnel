@@ -61,5 +61,5 @@ jobs:
       - name: Upload Release
         run: |
           cd $PROJECT_PATH
-          tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework && rm -r HevSocks5Tunnel.xcframework
+          tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework && rm -rf HevSocks5Tunnel.xcframework
           gh release upload $TAG_NAME "./hev-socks5-tunnel-$BOS-$BARCH.tar.gz"
