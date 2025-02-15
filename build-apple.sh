@@ -45,31 +45,18 @@ rm -rf $XCFRAMEWORK_DIR
 rm -rf HevSocks5Tunnel.xcframework
 mkdir $XCFRAMEWORK_DIR
 
-buildStatic iphoneos arm64 15.0
-buildStatic iphonesimulator x86_64 15.0
-buildStatic iphonesimulator arm64 15.0
-mergeStatic iphonesimulator x86_64 arm64
-
 # keep same with flutter
 buildStatic macosx x86_64 10.14
 buildStatic macosx arm64 10.14
 mergeStatic macosx x86_64 arm64
 
-buildStatic appletvos arm64 17.0
-buildStatic appletvsimulator x86_64 17.0
-buildStatic appletvsimulator arm64 17.0
-mergeStatic appletvsimulator x86_64 arm64
 
 INCLUDE_DIR="$XCFRAMEWORK_DIR/include"
 mkdir -p $INCLUDE_DIR
 cp ./src/hev-main.h $INCLUDE_DIR
 cp ./module.modulemap $INCLUDE_DIR
 xcodebuild -create-xcframework \
-    -library ./apple_xcframework/iphoneos-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
-    -library ./apple_xcframework/iphonesimulator-x86_64-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
     -library ./apple_xcframework/macosx-x86_64-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
-    -library ./apple_xcframework/appletvos-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
-    -library ./apple_xcframework/appletvsimulator-x86_64-arm64/libhev-socks5-tunnel.a -headers $INCLUDE_DIR \
     -output ./HevSocks5Tunnel.xcframework
 
 rm -rf ./apple_xcframework

@@ -11,43 +11,58 @@ on:
   workflow_dispatch:
 
 jobs:
-  source:
-    name: Source
-    runs-on: ubuntu-22.04
+  draft_release:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Gen Source
+      - uses: actions/checkout@v4
+      - name: Read version
+        id: read_version
         run: |
-          REV_ID=$(git rev-parse --short HEAD)
-          mkdir -p hev-socks5-tunnel-${{ github.ref_name }}
-          git ls-files --recurse-submodules | tar c -O -T- | tar x -C hev-socks5-tunnel-${{ github.ref_name }}
-          echo ${REV_ID} > hev-socks5-tunnel-${{ github.ref_name }}/.rev-id
-          tar cJf hev-socks5-tunnel-${{ github.ref_name }}.tar.xz hev-socks5-tunnel-${{ github.ref_name }}
-      - name: Upload source
-        uses: actions/upload-artifact@v4
+          echo "version=$(cat version/VERSION | tr -d '[:space:]')" >> $GITHUB_OUTPUT
+      - name: Print version
+        run: |
+          echo ${{ steps.read_version.outputs.version }}
+      - uses: release-drafter/release-drafter@v6
+        id: release
         with:
-          name: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
-          path: hev-socks5-tunnel-${{ github.ref_name }}.tar.xz
-          if-no-files-found: error
-          retention-days: 1
+          version: ${{ steps.read_version.outputs.version }}
+          name: v${{ steps.read_version.outputs.version }}
+          tag: v${{ steps.read_version.outputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   macos:
     name: macOS
     runs-on: macos-14
-    if: github.event_name != 'release'
+    permissions:
+      contents: write
+      pull-requests: write
+    env: 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG_NAME: ${{ needs.draft_release.outputs.tag_name }}
+      CGO_ENABLED: 0
+      PROJECT_PATH: ${{ github.workspace }}
+      BOS: darwin
+      BARCH: uni
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
           submodules: true
-      - name: Build native
-        run: |
-          make
-          make clean
       - name: Build cross
         run: |
+          cd $PROJECT_PATH
           ./build-apple.sh
+      - name: Move to PROJECT_PATH
+        run: |
+          mv /Users/runner/work/hev-socks5-tunnel/hev-socks5-tunnel/HevSocks5Tunnel.xcframework $PROJECT_PATH/HevSocks5Tunnel.xcframework
+      - name: Upload Release
+        run: |
+          cd $PROJECT_PATH
+          tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework && rm -r HevSocks5Tunnel.xcframework
+          gh release upload $TAG_NAME "./hev-socks5-tunnel-$BOS-$BARCH.tar.gz"
