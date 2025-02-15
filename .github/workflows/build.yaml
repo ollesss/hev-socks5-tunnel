@@ -1,14 +1,9 @@
-name: "Build"
+name: Release drafter
 
-on:
-  push:
-    branches:
-      - '**'
-  pull_request:
-  release:
-    types:
-      - published
-  workflow_dispatch:
+on: workflow_dispatch
+
+permissions:
+  contents: read
 
 jobs:
   draft_release:
@@ -35,10 +30,11 @@ jobs:
           tag: v${{ steps.read_version.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  macos:
-    name: macOS
-    runs-on: macos-14
+
+  build_amd64:
+    runs-on: macos-13
     needs: draft_release
+    name: Release amd64
     permissions:
       contents: write
       pull-requests: write
@@ -47,20 +43,51 @@ jobs:
       TAG_NAME: ${{ needs.draft_release.outputs.tag_name }}
       CGO_ENABLED: 0
       PROJECT_PATH: ${{ github.workspace }}
-      BOS: darwin
-      BARCH: uni
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-          submodules: true
-      - name: Build cross
-        run: |
-          cd $PROJECT_PATH
-          ./build-apple.sh
-      - name: Upload Release
-        run: |
-          cd $PROJECT_PATH
-          tar -czvf "HevSocks5Tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework
-          gh release upload $TAG_NAME "HevSocks5Tunnel-$BOS-$BARCH.tar.gz"
+    - uses: actions/checkout@v4
+    - name: Display GCC&&Make version
+      run: |
+        gcc --version
+        make --version
+    - name: darwin/amd64
+      env: 
+        BOS: darwin
+        BARCH: amd64
+      run: |
+        cd $PROJECT_PATH
+        ls
+        make
+        mv hev-socks5-tunnel hev-socks5-tunnel-x64
+        chmod +x hev-socks5-tunnel-x64
+        tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" hev-socks5-tunnel-x64 && rm -r hev-socks5-tunnel-x64
+        gh release upload $TAG_NAME "./hev-socks5-tunnel-$BOS-$BARCH.tar.gz"
+
+  build_arm64:
+    runs-on: macos-14
+    needs: draft_release
+    name: Release arm64
+    permissions:
+      contents: write
+      pull-requests: write
+    env: 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG_NAME: ${{ needs.draft_release.outputs.tag_name }}
+      CGO_ENABLED: 0
+      PROJECT_PATH: ${{ github.workspace }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: Display GCC&&Make version
+      run: |
+        gcc --version
+        make --version
+    - name: darwin/arm64
+      env: 
+        BOS: darwin
+        BARCH: arm64
+      run: |
+        cd $PROJECT_PATH
+        make
+        mv hev-socks5-tunnel hev-socks5-tunnel-arm
+        chmod +x hev-socks5-tunnel-arm
+        tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" hev-socks5-tunnel-arm && rm -r hev-socks5-tunnel-arm
+        gh release upload $TAG_NAME "./hev-socks5-tunnel-$BOS-$BARCH.tar.gz"
