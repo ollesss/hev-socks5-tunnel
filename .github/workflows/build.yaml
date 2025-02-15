@@ -38,6 +38,7 @@ jobs:
   macos:
     name: macOS
     runs-on: macos-14
+    needs: draft_release
     permissions:
       contents: write
       pull-requests: write
@@ -61,5 +62,4 @@ jobs:
       - name: Upload Release
         run: |
           cd $PROJECT_PATH
-          tar -zcvf "hev-socks5-tunnel-$BOS-$BARCH.tar.gz" HevSocks5Tunnel.xcframework
-          gh release upload $TAG_NAME "./hev-socks5-tunnel-$BOS-$BARCH.tar.gz"
+          gh release upload $TAG_NAME "./HevSocks5Tunnel.xcframework"
