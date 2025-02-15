@@ -68,6 +68,8 @@ jobs:
       TAG_NAME: ${{ needs.draft_release.outputs.tag_name }}
       CGO_ENABLED: 0
       PROJECT_PATH: ${{ github.workspace }}
+      BOS: darwin
+      BARCH: arm64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -78,6 +80,30 @@ jobs:
         run: |
           cd $PROJECT_PATH
           make
-          chmod +x hev-socks5-tunnel
-          tar -zcvf "hev-socks5-tunnel.tar.gz" hev-socks5-tunnel && rm -r hev-socks5-tunnel
-          gh release upload $TAG_NAME "./hev-socks5-tunneltar.gz"
+          chmod +x /bin/hev-socks5-tunnel
+          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" /bin/hev-socks5-tunnel && rm -rf /bin/hev-socks5-tunnel
+          gh release upload $TAG_NAME "/bin/hev-socks5-tunnel-$BARCH.tar.gz"
+  macos_x86:
+    name: macOS
+    runs-on: macos-13
+    needs: draft_release
+    env: 
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG_NAME: ${{ needs.draft_release.outputs.tag_name }}
+      CGO_ENABLED: 0
+      PROJECT_PATH: ${{ github.workspace }}
+      BOS: darwin
+      BARCH: x86
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          submodules: true
+      - name: Build native
+        run: |
+          cd $PROJECT_PATH
+          make
+          chmod +x /bin/hev-socks5-tunnel
+          tar -zcvf "hev-socks5-tunnel-$BARCH.tar.gz" /bin/hev-socks5-tunnel && rm -rf /bin/hev-socks5-tunnel
+          gh release upload $TAG_NAME "/bin/hev-socks5-tunnel-$BARCH.tar.gz"
